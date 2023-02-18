@@ -1,11 +1,9 @@
-export default {
+import { defineConfig } from "vite";
+
+export default defineConfig({
   build: {
     rollupOptions: {
       input: ["index.html"],
-      // output: {
-      //   dir: "dist",
-      //   format: "iife",
-      // },
       output: {
         format: "iife",
       },
@@ -15,4 +13,4 @@ export default {
   esbuild: {
     minifyIdentifiers: false,
   },
-};
+});
