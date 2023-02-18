@@ -27,6 +27,10 @@ let maxFood = 30;
 let foodChance = 0.02;
 let sizeThreshold = 5;
 
+const gameOverMessage = "Oh dear, you are dead!";
+let gameOver = false;
+let finalScore = 0;
+
 function setup() {
   new Canvas(windowWidth, windowHeight);
   noStroke();
@@ -54,6 +58,24 @@ function draw() {
   }
 }
 
+function endGame() {
+  gameOver = true;
+
+  textAlign(CENTER);
+  textSize(32);
+  fill(colors.foreground);
+  text(gameOverMessage, width / 2, height / 2 - 20);
+  text(`Final score: ${finalScore}`, width / 2, height / 2 + 20);
+  noLoop();
+}
+
+function restart() {
+  gameOver = false;
+  finalScore = 0;
+  // need to remake player sprite?
+  // start loop again
+}
+
 function handleEnemyMove() {
   let positions = [];
   for (const [i, enemy] of enemies.entries()) {
@@ -77,21 +99,32 @@ function handleEnemyMove() {
 }
 
 function siphon(good, evil) {
+  console.log(finalScore);
   if (good.d > evil.d) {
     good.d += 0.5;
     evil.d -= 0.5;
+    if (good.idNum === player.idNum) finalScore = good.d;
   } else {
     good.d -= 0.5;
     evil.d += 0.5;
+    if (evil.idNum === player.idNum) finalScore = evil.d;
   }
 
-  if (good.d < sizeThreshold) good.remove();
-  if (evil.d < sizeThreshold) evil.remove();
+  if (good.d < sizeThreshold) {
+    if (good.idNum === player.idNum) endGame();
+    good.remove();
+  }
+  if (evil.d < sizeThreshold) {
+    if (evil.idNum === player.idNum) endGame();
+    evil.remove();
+  }
 }
 
 function eat(spr, food) {
   spr.d += 0.5;
   food.d -= 0.5;
+
+  if (spr.idNum === player.idNum) finalScore = spr.d;
 
   if (food.d < sizeThreshold) food.remove();
 }
@@ -130,6 +163,7 @@ function setupPlayer() {
   player.color = colors.yellow;
   player.d = playerSize;
   player.bounciness = 1;
+  finalScore = player.d;
 }
 
 function setupFood() {
