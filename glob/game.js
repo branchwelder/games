@@ -31,6 +31,8 @@ const gameOverMessage = "Oh dear, you are dead!";
 let gameOver = false;
 let finalScore = 0;
 
+let scoreSize = 32;
+
 function setup() {
   new Canvas(windowWidth, windowHeight);
   noStroke();
@@ -56,16 +58,39 @@ function draw() {
   if (food.length < maxFood) {
     if (random() < foodChance) new food.Sprite();
   }
+
+  drawScore();
+}
+
+function drawScore() {
+  textAlign(RIGHT, TOP);
+  textSize(scoreSize);
+  let wordWidth = textWidth(finalScore);
+  fill(colors.purple);
+  rectMode(CORNERS);
+  rect(width, 0, width - wordWidth - 20, scoreSize + 20, 20);
+  fill(colors.foreground);
+  text(finalScore, width - 10, 10);
 }
 
 function endGame() {
-  gameOver = true;
+  // let message1 = `Oh dear, you are dead!`;
+  let scoreMessage = `Final score: ${finalScore}`;
+  let messageWidth = textWidth(scoreMessage);
 
-  textAlign(CENTER);
-  textSize(32);
+  // Draw background rect
+  fill(colors.purple);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, messageWidth + 20, scoreSize + 20, 20);
+
+  // Draw Text
+  textAlign(CENTER, BOTTOM);
+  textSize(scoreSize);
   fill(colors.foreground);
-  text(gameOverMessage, width / 2, height / 2 - 20);
-  text(`Final score: ${finalScore}`, width / 2, height / 2 + 20);
+  text(scoreMessage, width / 2, height / 2);
+
+  // Stop game
+  gameOver = true;
   noLoop();
 }
 
@@ -98,16 +123,19 @@ function handleEnemyMove() {
   }
 }
 
+function updateScore(newScore) {
+  if (newScore > finalScore) finalScore = Math.ceil(newScore);
+}
+
 function siphon(good, evil) {
-  console.log(finalScore);
   if (good.d > evil.d) {
     good.d += 0.5;
     evil.d -= 0.5;
-    if (good.idNum === player.idNum) finalScore = good.d;
+    if (good.idNum === player.idNum) updateScore(good.d);
   } else {
     good.d -= 0.5;
     evil.d += 0.5;
-    if (evil.idNum === player.idNum) finalScore = evil.d;
+    if (evil.idNum === player.idNum) updateScore(evil.d);
   }
 
   if (good.d < sizeThreshold) {
@@ -124,7 +152,7 @@ function eat(spr, food) {
   spr.d += 0.5;
   food.d -= 0.5;
 
-  if (spr.idNum === player.idNum) finalScore = spr.d;
+  if (spr.idNum === player.idNum) updateScore(spr.d);
 
   if (food.d < sizeThreshold) food.remove();
 }
